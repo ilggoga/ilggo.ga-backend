@@ -18,6 +18,7 @@ func main() {
 	router := gin.Default()
 
 	router.POST("/api/account", endpoints.AccountCreation(db))
+	router.PUT("/api/account", endpoints.AccountUpdation(db))
 	router.Static("/", "./dist")
 	router.Run()
 }

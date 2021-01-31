@@ -12,7 +12,14 @@ import (
 type accountCreationBody struct {
 	ID      string `json:"id"`
 	Passwd  string `json:"passwd"`
-	Display string `json:"Display"`
+	Display string `json:"display"`
+}
+
+type accountUpdationBody struct {
+	ID        string `json:"id"`
+	NewPasswd string `json:"newpasswd"`
+	OldPasswd string `json:"oldpasswd"`
+	Display   string `json:"display"`
 }
 
 // AccountCreation returns account endpoint
@@ -56,16 +63,110 @@ func AccountCreation(db *sql.DB) gin.HandlerFunc {
 			return
 		}
 
-		hashFn := sha512.New()
-		hashFn.Write([]byte(body.Passwd))
+		display := sql.NullString{}
+		if len(body.Display) > 0 {
+			display = sql.NullString{
+				Valid:  true,
+				String: body.Display,
+			}
+		}
 
-		passwdHash := hex.EncodeToString(hashFn.Sum(nil))
-		exists := database.CheckUserExists(db, body.ID, body.Display)
+		exists := database.CheckUserExists(db, body.ID, display)
 		if exists {
 			c.JSON(400, gin.H{
 				"code":    115,
 				"success": false,
 				"message": "해당 ID/닉네임은 이미 사용중입니다.",
+			})
+			return
+		}
+
+		hashFn := sha512.New()
+		hashFn.Write([]byte(body.Passwd))
+
+		passwdHash := hex.EncodeToString(hashFn.Sum(nil))
+		database.CreateUser(db, body.ID, display, passwdHash)
+
+		c.JSON(201, gin.H{
+			"code":    110,
+			"success": true,
+			"message": "유저가 성공적으로 추가되었습니다.",
+		})
+	}
+}
+
+// AccountUpdation returns account updation endpoint
+func AccountUpdation(db *sql.DB) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var body accountUpdationBody
+
+		err := c.ShouldBindJSON(&body)
+		if err != nil {
+			c.JSON(400, gin.H{
+				"code":    121,
+				"success": false,
+				"message": "요청이 잘못되었습니다.",
+			})
+			return
+		}
+
+		if len(body.ID) < 8 || len(body.ID) > 12 {
+			c.JSON(400, gin.H{
+				"code":    122,
+				"success": false,
+				"message": "ID가 올바르지 않은 형식입니다.",
+			})
+			return
+		}
+
+		if len(body.Display) > 50 {
+			c.JSON(400, gin.H{
+				"code":    123,
+				"success": false,
+				"message": "닉네임은 최대 50자 까지 사용가능 합니다.",
+			})
+		}
+
+		if len(body.NewPasswd) < 8 {
+			c.JSON(400, gin.H{
+				"code":    124,
+				"success": false,
+				"message": "신규 비밀번호는 최소 8자리 이상이여야 합니다.",
+			})
+			return
+		}
+
+		users := database.GetUsers(db, body.ID, sql.NullString{Valid: true, String: ""})
+		if len(users) < 1 {
+			c.JSON(400, gin.H{
+				"code":    125,
+				"success": false,
+				"message": "유저를 찾을 수 없습니다.",
+			})
+			return
+		}
+
+		displayUsers := database.GetUsers(db, "", sql.NullString{Valid: true, String: body.Display})
+		if len(displayUsers) > 0 {
+			if displayUsers[0].ID != body.ID {
+				c.JSON(400, gin.H{
+					"code":    126,
+					"success": false,
+					"message": "이미 사용중인 닉네임입니다.",
+				})
+				return
+			}
+		}
+
+		hashFn := sha512.New()
+		hashFn.Write([]byte(body.OldPasswd))
+
+		oldPasswdHash := hex.EncodeToString(hashFn.Sum(nil))
+		if users[0].Passwd != oldPasswdHash {
+			c.JSON(400, gin.H{
+				"code":    127,
+				"success": false,
+				"message": "기존 비밀번호가 일치하지 않습니다.",
 			})
 			return
 		}
@@ -78,12 +179,10 @@ func AccountCreation(db *sql.DB) gin.HandlerFunc {
 			}
 		}
 
-		database.CreateUser(db, body.ID, display, passwdHash)
+		hashFn = sha512.New()
+		hashFn.Write([]byte(body.NewPasswd))
 
-		c.JSON(201, gin.H{
-			"code":    110,
-			"success": true,
-			"message": "유저가 성공적으로 추가되었습니다.",
-		})
+		newPasswdHash := hex.EncodeToString(hashFn.Sum(nil))
+		database.UpdateUser(db, body.ID, display, newPasswdHash)
 	}
 }
