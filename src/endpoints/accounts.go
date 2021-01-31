@@ -4,7 +4,9 @@ import (
 	"crypto/sha512"
 	"database/sql"
 	"encoding/hex"
+	"time"
 
+	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 	"github.com/pmh-only/ilggo.ga/src/database"
 )
@@ -20,6 +22,11 @@ type accountUpdationBody struct {
 	NewPasswd string `json:"newpasswd"`
 	OldPasswd string `json:"oldpasswd"`
 	Display   string `json:"display"`
+}
+
+type accountLoginBody struct {
+	ID     string `json:"id"`
+	Passwd string `json:"passwd"`
 }
 
 // AccountCreation returns account endpoint
@@ -184,5 +191,68 @@ func AccountUpdation(db *sql.DB) gin.HandlerFunc {
 
 		newPasswdHash := hex.EncodeToString(hashFn.Sum(nil))
 		database.UpdateUser(db, body.ID, display, newPasswdHash)
+
+		c.JSON(400, gin.H{
+			"code":    120,
+			"success": false,
+			"message": "유저정보가 성공적으로 수정되었습니다.",
+		})
+	}
+}
+
+// AccountLogin checks account infomations & generate jwt
+func AccountLogin(db *sql.DB, token string) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var body accountLoginBody
+
+		err := c.ShouldBindJSON(&body)
+		if err != nil {
+			c.JSON(400, gin.H{
+				"code":    131,
+				"success": false,
+				"message": "요청이 잘못되었습니다.",
+			})
+			return
+		}
+
+		users := database.GetUsers(db, body.ID, sql.NullString{Valid: true, String: ""})
+		if len(users) < 1 {
+			c.JSON(400, gin.H{
+				"code":    132,
+				"success": false,
+				"message": "유저를 찾을 수 없습니다.",
+			})
+			return
+		}
+
+		hashFn := sha512.New()
+		hashFn.Write([]byte(body.Passwd))
+
+		passwdHash := hex.EncodeToString(hashFn.Sum(nil))
+		if users[0].Passwd != passwdHash {
+			c.JSON(400, gin.H{
+				"code":    133,
+				"success": false,
+				"message": "비밀번호가 일치하지 않습니다.",
+			})
+			return
+		}
+
+		token, err := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+			"id":  body.ID,
+			"iat": time.Now().Unix(),
+			"exp": time.Now().AddDate(0, 0, 1).Unix(),
+		}).SignedString([]byte(token))
+
+		if err != nil {
+			panic(err)
+		}
+
+		c.JSON(400, gin.H{
+			"code":    130,
+			"success": false,
+			"message": "로그인이 완료되었습니다.",
+			"data":    token,
+		})
 	}
 }
