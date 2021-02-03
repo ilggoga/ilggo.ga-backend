@@ -8,7 +8,7 @@ import (
 )
 
 // NovelFetching checks novel exist & returns novel infomation
-func NovelFetching(db *sql.DB, token string) gin.HandlerFunc {
+func NovelFetching(db *sql.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		id := c.Param("id")
 
@@ -24,6 +24,18 @@ func NovelFetching(db *sql.DB, token string) gin.HandlerFunc {
 
 		c.JSON(200, gin.H{
 			"code":    210,
+			"success": true,
+			"data":    novels[0],
+		})
+	}
+}
+
+// NovelListing returns full list of novels
+func NovelListing(db *sql.DB) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		novels := database.GetNovels(db, "", "", true)
+		c.JSON(200, gin.H{
+			"code":    220,
 			"success": true,
 			"data":    novels,
 		})

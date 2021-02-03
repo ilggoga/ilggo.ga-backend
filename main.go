@@ -23,7 +23,8 @@ func main() {
 	router.POST("/api/accounts", endpoints.AccountCreation(db))
 	router.PUT("/api/accounts", endpoints.AccountUpdation(db))
 
-	router.GET("/api/novels/:id", endpoints.NovelFetching(db, token))
+	router.GET("/api/novels", endpoints.NovelListing(db))
+	router.GET("/api/novels/:id", endpoints.NovelFetching(db))
 
 	router.GET("/", func(c *gin.Context) { c.Redirect(301, "/bbs") })
 	router.Static("/bbs", "./dist")
