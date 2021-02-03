@@ -80,7 +80,7 @@ func AccountCreation(db *sql.DB) gin.HandlerFunc {
 
 		exists := database.CheckUserExists(db, body.ID, display)
 		if exists {
-			c.JSON(400, gin.H{
+			c.JSON(409, gin.H{
 				"code":    115,
 				"success": false,
 				"message": "해당 ID/닉네임은 이미 사용중입니다.",
@@ -145,7 +145,7 @@ func AccountUpdation(db *sql.DB) gin.HandlerFunc {
 
 		users := database.GetUsers(db, body.ID, sql.NullString{Valid: true, String: ""})
 		if len(users) < 1 {
-			c.JSON(400, gin.H{
+			c.JSON(404, gin.H{
 				"code":    125,
 				"success": false,
 				"message": "유저를 찾을 수 없습니다.",
@@ -156,7 +156,7 @@ func AccountUpdation(db *sql.DB) gin.HandlerFunc {
 		displayUsers := database.GetUsers(db, "", sql.NullString{Valid: true, String: body.Display})
 		if len(displayUsers) > 0 {
 			if displayUsers[0].ID != body.ID {
-				c.JSON(400, gin.H{
+				c.JSON(409, gin.H{
 					"code":    126,
 					"success": false,
 					"message": "이미 사용중인 닉네임입니다.",
@@ -170,7 +170,7 @@ func AccountUpdation(db *sql.DB) gin.HandlerFunc {
 
 		oldPasswdHash := hex.EncodeToString(hashFn.Sum(nil))
 		if users[0].Passwd != oldPasswdHash {
-			c.JSON(400, gin.H{
+			c.JSON(403, gin.H{
 				"code":    127,
 				"success": false,
 				"message": "기존 비밀번호가 일치하지 않습니다.",
@@ -194,7 +194,7 @@ func AccountUpdation(db *sql.DB) gin.HandlerFunc {
 
 		c.JSON(400, gin.H{
 			"code":    120,
-			"success": false,
+			"success": true,
 			"message": "유저정보가 성공적으로 수정되었습니다.",
 		})
 	}
@@ -230,7 +230,7 @@ func AccountLogin(db *sql.DB, token string) gin.HandlerFunc {
 
 		passwdHash := hex.EncodeToString(hashFn.Sum(nil))
 		if users[0].Passwd != passwdHash {
-			c.JSON(400, gin.H{
+			c.JSON(403, gin.H{
 				"code":    133,
 				"success": false,
 				"message": "비밀번호가 일치하지 않습니다.",
@@ -248,9 +248,9 @@ func AccountLogin(db *sql.DB, token string) gin.HandlerFunc {
 			panic(err)
 		}
 
-		c.JSON(400, gin.H{
+		c.JSON(200, gin.H{
 			"code":    130,
-			"success": false,
+			"success": true,
 			"message": "로그인이 완료되었습니다.",
 			"data":    token,
 		})

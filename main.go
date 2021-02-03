@@ -19,9 +19,11 @@ func main() {
 
 	router := gin.Default()
 
-	router.GET("/api/account", endpoints.AccountLogin(db, token))
-	router.POST("/api/account", endpoints.AccountCreation(db))
-	router.PUT("/api/account", endpoints.AccountUpdation(db))
+	router.POST("/api/auth", endpoints.AccountLogin(db, token))
+	router.POST("/api/accounts", endpoints.AccountCreation(db))
+	router.PUT("/api/accounts", endpoints.AccountUpdation(db))
+
+	router.GET("/api/novels/:id", endpoints.NovelFetching(db, token))
 
 	router.GET("/", func(c *gin.Context) { c.Redirect(301, "/bbs") })
 	router.Static("/bbs", "./dist")

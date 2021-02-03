@@ -26,3 +26,14 @@ func GenerateRandomString(length int) (string, error) {
 		}
 	}
 }
+
+// from https://stackoverflow.com/a/27272103
+func IsInStringSlice(slice []string, item string) bool {
+	set := make(map[string]struct{}, len(slice))
+	for _, s := range slice {
+		set[s] = struct{}{}
+	}
+
+	_, ok := set[item]
+	return ok
+}

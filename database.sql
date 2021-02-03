@@ -11,3 +11,11 @@ create table users (
   is_admin boolean default false not null, -- is admin permited?
   created_at timestamp default current_timestamp not null -- account creation timestamp
 );
+
+create table novels (
+  flags text default "", -- novel flags
+  content text not null, -- content of novel
+  id varchar(12) not null, -- identifier
+  author varchar(12) not null, -- author identifier
+  created_at timestamp default current_timestamp not null -- novel creation timestamp
+);
