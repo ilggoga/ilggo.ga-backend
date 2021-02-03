@@ -24,6 +24,7 @@ func main() {
 	router.PUT("/api/accounts", endpoints.AccountUpdation(db))
 
 	router.GET("/api/novels", endpoints.NovelListing(db))
+	router.POST("/api/novels", endpoints.NovelCreation(db, token))
 	router.GET("/api/novels/:id", endpoints.NovelFetching(db))
 
 	router.GET("/", func(c *gin.Context) { c.Redirect(301, "/bbs") })

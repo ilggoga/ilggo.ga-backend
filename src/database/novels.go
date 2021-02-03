@@ -9,7 +9,7 @@ import (
 
 // NovelStruct - sql structure for novel
 type NovelStruct struct {
-	ID        string    `db:"id"`
+	ID        int       `db:"id"`
 	Flags     string    `db:"flags"`
 	Author    string    `db:"author"`
 	Content   string    `db:"content"`
@@ -38,7 +38,7 @@ func GetNovels(db *sql.DB, id string, author string, all bool) []NovelStruct {
 
 	for query.Next() {
 		var result NovelStruct
-		err = query.Scan(&result.Content, &result.ID, &result.Author, &result.CreatedAt)
+		err = query.Scan(&result.Content, &result.ID, &result.Author, &result.CreatedAt, &result.Flags)
 
 		if err != nil {
 			panic(err)
@@ -54,4 +54,17 @@ func GetNovels(db *sql.DB, id string, author string, all bool) []NovelStruct {
 func CheckNovelExists(db *sql.DB, id string, author string) bool {
 	users := GetNovels(db, id, author, false)
 	return len(users) > 0
+}
+
+// CreateNovel creates novel and returns nothing
+func CreateNovel(db *sql.DB, id int, author string, content string, flags string) {
+	builder := sqlbuilder.NewInsertBuilder()
+	sql, args :=
+		builder.InsertInto("novels").Cols("id", "author", "content", "flags").Values(id, author, content, flags).Build()
+
+	_, err := db.Query(sql, args...)
+
+	if err != nil {
+		panic(err)
+	}
 }

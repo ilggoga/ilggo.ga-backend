@@ -20,7 +20,7 @@ type UserStruct struct {
 func GetUsers(db *sql.DB, id string, display sql.NullString) []UserStruct {
 	builder := sqlbuilder.NewSelectBuilder()
 
-	builder.Select("*").From("users").Where(builder.Or(builder.Equal("id", id), builder.Equal("display", display)))
+	builder.Select("*").From("users").Where(builder.Or(builder.Equal("id", id), builder.Equal("display", display))).OrderBy("id")
 
 	sql, args := builder.Build()
 	query, err := db.Query(sql, args...)
