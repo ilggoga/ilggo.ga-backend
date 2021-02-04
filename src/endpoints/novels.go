@@ -126,6 +126,7 @@ func NovelCreation(db *sql.DB, token string) gin.HandlerFunc {
 	}
 }
 
+// NovelUpdation checks permission and update novel infomations
 func NovelUpdation(db *sql.DB, token string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		id, err := strconv.Atoi(c.Param("id"))
@@ -212,6 +213,70 @@ func NovelUpdation(db *sql.DB, token string) gin.HandlerFunc {
 			"code":    240,
 			"success": true,
 			"message": "문서가 성공적으로 수정 되었습니다.",
+		})
+	}
+}
+
+// NovelDeletion checks permissions and mark deleted
+func NovelDeletion(db *sql.DB, token string) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		id, err := strconv.Atoi(c.Param("id"))
+
+		if err != nil || id < 0 {
+			c.JSON(400, gin.H{
+				"code":    251,
+				"success": false,
+				"message": c.Param("id") + "는 올바른 자연수가 아닙니다.",
+			})
+			return
+		}
+
+		novels := database.GetNovels(db, id, "", false)
+		if len(novels) < 1 {
+			c.JSON(400, gin.H{
+				"code":    252,
+				"success": false,
+				"message": "문서를 찾을 수 없습니다.",
+			})
+			return
+		}
+
+		authHeader := strings.Split(c.GetHeader("Authorization"), " ")
+		if authHeader[0] != "Bearer" {
+			c.JSON(401, gin.H{
+				"code":    253,
+				"success": false,
+				"message": "인증 헤더가 잘못 입력되었습니다.",
+			})
+			return
+		}
+
+		user, err := utils.GetUsersFromJWT(db, authHeader[1], token)
+		if err != nil {
+			c.JSON(401, gin.H{
+				"code":    254,
+				"success": false,
+				"message": "토큰을 해석 할 수 없습니다.",
+				"error":   err.Error(),
+			})
+			return
+		}
+
+		if user.ID != novels[0].Author {
+			c.JSON(403, gin.H{
+				"code":    255,
+				"success": false,
+				"message": "본인이 쓴 게시글만 삭제할 수 있습니다.",
+				"error":   err.Error(),
+			})
+			return
+		}
+
+		database.DeleteNovel(db, id)
+		c.JSON(200, gin.H{
+			"code":    250,
+			"success": true,
+			"message": "문서가 성공적으로 삭제 되었습니다.",
 		})
 	}
 }

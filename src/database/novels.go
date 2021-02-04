@@ -83,3 +83,18 @@ func UpdateNovel(db *sql.DB, id int, content string, flags string) {
 		panic(err)
 	}
 }
+
+// DeleteNovel deletes novel
+func DeleteNovel(db *sql.DB, id int) {
+	novels := GetNovels(db, id, "", false)
+	flags := novels[0].Flags + "deleted,"
+
+	builder := sqlbuilder.NewUpdateBuilder()
+	sql, args :=
+		builder.Update("novels").Where(builder.Equal("id", id)).Set(builder.Assign("flags", flags)).Build()
+
+	_, err := db.Query(sql, args...)
+	if err != nil {
+		panic(err)
+	}
+}
