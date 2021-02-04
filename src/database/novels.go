@@ -17,7 +17,7 @@ type NovelStruct struct {
 }
 
 // GetNovels searches novel from given infomations
-func GetNovels(db *sql.DB, id string, author string, all bool) []NovelStruct {
+func GetNovels(db *sql.DB, id int, author string, all bool) []NovelStruct {
 	builder := sqlbuilder.NewSelectBuilder()
 
 	builder.Select("*").From("novels").Where(
@@ -51,7 +51,7 @@ func GetNovels(db *sql.DB, id string, author string, all bool) []NovelStruct {
 }
 
 // CheckNovelExists returns true when novel exists
-func CheckNovelExists(db *sql.DB, id string, author string) bool {
+func CheckNovelExists(db *sql.DB, id int, author string) bool {
 	users := GetNovels(db, id, author, false)
 	return len(users) > 0
 }
@@ -64,6 +64,21 @@ func CreateNovel(db *sql.DB, id int, author string, content string, flags string
 
 	_, err := db.Query(sql, args...)
 
+	if err != nil {
+		panic(err)
+	}
+}
+
+// UpdateNovel updates novel infomations
+func UpdateNovel(db *sql.DB, id int, content string, flags string) {
+	builder := sqlbuilder.NewUpdateBuilder()
+	sql, args :=
+		builder.Update("novels").Where(builder.Equal("id", id)).Set(
+			builder.Assign("content", content),
+			builder.Assign("flags", flags),
+		).Build()
+
+	_, err := db.Query(sql, args...)
 	if err != nil {
 		panic(err)
 	}
