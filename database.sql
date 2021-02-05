@@ -14,6 +14,7 @@ create table users (
 
 create table novels (
   id int not null primary key, -- identifier
+  likes text default "", -- liked users
   flags text default "", -- novel flags
   content text not null, -- content of novel
   author varchar(12) not null, -- author identifier

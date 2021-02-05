@@ -29,6 +29,9 @@ func main() {
 	router.PUT("/api/novels/:id", endpoints.NovelUpdation(db, token))
 	router.DELETE("/api/novels/:id", endpoints.NovelDeletion(db, token))
 
+	router.PUT("/api/novels/:id/like", endpoints.CommuAddLike(db, token))
+	router.DELETE("/api/novels/:id/like", endpoints.CommuRemoveLike(db, token))
+
 	router.GET("/", func(c *gin.Context) { c.Redirect(301, "/bbs") })
 	router.Static("/bbs", "./dist")
 	router.Run()

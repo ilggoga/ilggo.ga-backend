@@ -10,6 +10,7 @@ import (
 // NovelStruct - sql structure for novel
 type NovelStruct struct {
 	ID        int       `db:"id"`
+	Likes     string    `db:"likes"`
 	Flags     string    `db:"flags"`
 	Author    string    `db:"author"`
 	Content   string    `db:"content"`
@@ -38,7 +39,7 @@ func GetNovels(db *sql.DB, id int, author string, all bool) []NovelStruct {
 
 	for query.Next() {
 		var result NovelStruct
-		err = query.Scan(&result.Content, &result.ID, &result.Author, &result.CreatedAt, &result.Flags)
+		err = query.Scan(&result.Content, &result.ID, &result.Author, &result.CreatedAt, &result.Flags, &result.Likes)
 
 		if err != nil {
 			panic(err)
