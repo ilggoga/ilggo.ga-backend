@@ -20,6 +20,7 @@ func main() {
 	router := gin.Default()
 
 	router.POST("/api/auth", endpoints.AccountLogin(db, token))
+	router.GET("/api/accounts/:id", endpoints.AccountFetching(db))
 	router.POST("/api/accounts", endpoints.AccountCreation(db))
 	router.PUT("/api/accounts", endpoints.AccountUpdation(db))
 

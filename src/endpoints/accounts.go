@@ -29,6 +29,31 @@ type accountLoginBody struct {
 	Passwd string `json:"passwd"`
 }
 
+// AccountFetching checks account exist & returns account infomation
+func AccountFetching(db *sql.DB) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		id := c.Param("id")
+
+		users := database.GetUsers(db, id, sql.NullString{Valid: true, String: ""})
+		if len(users) < 1 {
+			c.JSON(404, gin.H{
+				"code":    141,
+				"success": false,
+				"message": "유저를 찾을 수 없습니다.",
+			})
+			return
+		}
+
+		users[0].Passwd = "<unknown>"
+
+		c.JSON(200, gin.H{
+			"code":    140,
+			"success": true,
+			"data":    users[0],
+		})
+	}
+}
+
 // AccountCreation returns account endpoint
 func AccountCreation(db *sql.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
