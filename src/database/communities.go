@@ -10,7 +10,7 @@ import (
 
 // CommentStruct - sql structure for comments
 type CommentStruct struct {
-	ID        string    `db:"id"`
+	ID        int       `db:"id"`
 	Novel     int       `db:"novel"`
 	Author    string    `db:"author"`
 	Content   string    `db:"content"`
@@ -59,13 +59,14 @@ func RemoveLikes(db *sql.DB, id int, user string) {
 }
 
 // GetComments searches comment from given infomations
-func GetComments(db *sql.DB, id int, novel int) []CommentStruct {
+func GetComments(db *sql.DB, id int, novel int, all bool) []CommentStruct {
 	builder := sqlbuilder.NewSelectBuilder()
 
 	builder.Select("*").From("comments").Where(
 		builder.Or(
 			builder.Equal("id", id),
 			builder.Equal("novel", novel),
+			builder.Equal("true", all),
 		)).Desc().OrderBy("created_at")
 
 	sql, args := builder.Build()
@@ -89,4 +90,43 @@ func GetComments(db *sql.DB, id int, novel int) []CommentStruct {
 	}
 
 	return results
+}
+
+// CreateComment creates comment and returns nothing
+func CreateComment(db *sql.DB, id int, novel int, author string, content string) {
+	builder := sqlbuilder.NewInsertBuilder()
+	sql, args :=
+		builder.InsertInto("comments").Cols("id", "novel", "author", "content").Values(id, novel, author, content).Build()
+
+	_, err := db.Query(sql, args...)
+
+	if err != nil {
+		panic(err)
+	}
+}
+
+// UpdateComment updates comment infomations
+func UpdateComment(db *sql.DB, id int, content string) {
+	builder := sqlbuilder.NewUpdateBuilder()
+	sql, args :=
+		builder.Update("comments").Where(builder.Equal("id", id)).Set(
+			builder.Assign("content", content),
+		).Build()
+
+	_, err := db.Query(sql, args...)
+	if err != nil {
+		panic(err)
+	}
+}
+
+// DeleteComment deletes comment
+func DeleteComment(db *sql.DB, id int) {
+	builder := sqlbuilder.NewDeleteBuilder()
+	sql, args :=
+		builder.DeleteFrom("comments").Where(builder.Equal("id", id)).Build()
+
+	_, err := db.Query(sql, args...)
+	if err != nil {
+		panic(err)
+	}
 }
