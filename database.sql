@@ -20,3 +20,11 @@ create table novels (
   author varchar(12) not null, -- author identifier
   created_at timestamp default current_timestamp not null -- novel creation timestamp
 );
+
+create table comments (
+  id int not null primary key, -- identifier
+  novel int not null, -- target novel
+  author varchar(12) not null, -- comment author
+  content text not null, -- content of comment
+  created_at timestamp default current_timestamp not null -- comment creation timestamp 
+);

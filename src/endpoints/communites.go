@@ -137,3 +137,36 @@ func CommuRemoveLike(db *sql.DB, token string) gin.HandlerFunc {
 		})
 	}
 }
+
+// CommuCommentListing returns comment
+func CommuCommentListing(db *sql.DB) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		id, err := strconv.Atoi(c.Param("id"))
+
+		if err != nil || id < 0 {
+			c.JSON(400, gin.H{
+				"code":    331,
+				"success": false,
+				"message": c.Param("id") + "는 올바른 자연수가 아닙니다.",
+			})
+			return
+		}
+
+		novels := database.GetNovels(db, id, "", false)
+		if len(novels) < 1 {
+			c.JSON(400, gin.H{
+				"code":    332,
+				"success": false,
+				"message": "문서를 찾을 수 없습니다.",
+			})
+			return
+		}
+
+		comments := database.GetComments(db, -1, id)
+		c.JSON(200, gin.H{
+			"code":    330,
+			"success": true,
+			"data":    comments,
+		})
+	}
+}
