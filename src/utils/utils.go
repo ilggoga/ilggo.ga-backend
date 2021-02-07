@@ -69,3 +69,18 @@ func GetUsersFromJWT(db *sql.DB, token string, key string) (database.UserStruct,
 
 	return database.UserStruct{}, err
 }
+
+// from https://stackoverflow.com/a/56129336
+func Substr(input string, start int, length int) string {
+	asRunes := []rune(input)
+
+	if start >= len(asRunes) {
+		return ""
+	}
+
+	if start+length > len(asRunes) {
+		length = len(asRunes) - start
+	}
+
+	return string(asRunes[start : start+length])
+}

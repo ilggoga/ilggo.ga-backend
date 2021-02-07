@@ -17,6 +17,7 @@ create table novels (
   likes text default "", -- liked users
   flags text default "", -- novel flags
   content text not null, -- content of novel
+  title varchar(50) not null, -- title of novel
   author varchar(12) not null, -- author identifier
   created_at timestamp default current_timestamp not null -- novel creation timestamp
 );

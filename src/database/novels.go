@@ -13,6 +13,7 @@ type NovelStruct struct {
 	Likes     string    `db:"likes"`
 	Flags     string    `db:"flags"`
 	Author    string    `db:"author"`
+	Title     string    `db:"title"`
 	Content   string    `db:"content"`
 	CreatedAt time.Time `db:"created_at"`
 }
@@ -39,7 +40,7 @@ func GetNovels(db *sql.DB, id int, author string, all bool) []NovelStruct {
 
 	for query.Next() {
 		var result NovelStruct
-		err = query.Scan(&result.Content, &result.ID, &result.Author, &result.CreatedAt, &result.Flags, &result.Likes)
+		err = query.Scan(&result.Content, &result.ID, &result.Author, &result.CreatedAt, &result.Flags, &result.Likes, &result.Title)
 
 		if err != nil {
 			panic(err)
@@ -58,10 +59,10 @@ func CheckNovelExists(db *sql.DB, id int, author string) bool {
 }
 
 // CreateNovel creates novel and returns nothing
-func CreateNovel(db *sql.DB, id int, author string, content string, flags string) {
+func CreateNovel(db *sql.DB, id int, author string, title string, content string, flags string) {
 	builder := sqlbuilder.NewInsertBuilder()
 	sql, args :=
-		builder.InsertInto("novels").Cols("id", "author", "content", "flags").Values(id, author, content, flags).Build()
+		builder.InsertInto("novels").Cols("id", "author", "title", "content", "flags").Values(id, author, title, content, flags).Build()
 
 	_, err := db.Query(sql, args...)
 
@@ -71,10 +72,11 @@ func CreateNovel(db *sql.DB, id int, author string, content string, flags string
 }
 
 // UpdateNovel updates novel infomations
-func UpdateNovel(db *sql.DB, id int, content string, flags string) {
+func UpdateNovel(db *sql.DB, id int, title string, content string, flags string) {
 	builder := sqlbuilder.NewUpdateBuilder()
 	sql, args :=
 		builder.Update("novels").Where(builder.Equal("id", id)).Set(
+			builder.Assign("title", title),
 			builder.Assign("content", content),
 			builder.Assign("flags", flags),
 		).Build()

@@ -13,6 +13,7 @@ import (
 type novelCreationBody struct {
 	Flags   []string `json:"flags"`
 	Content string   `json:"content"`
+	Title   string   `json:"title"`
 }
 
 // NovelFetching checks novel exist & returns novel infomation
@@ -116,7 +117,7 @@ func NovelCreation(db *sql.DB, token string) gin.HandlerFunc {
 			id = novels[0].ID + 1
 		}
 
-		database.CreateNovel(db, id, user.ID, body.Content, flagsStr)
+		database.CreateNovel(db, id, user.ID, utils.Substr(body.Title, 0, 50), body.Content, flagsStr)
 
 		c.JSON(201, gin.H{
 			"code":    230,
@@ -207,7 +208,7 @@ func NovelUpdation(db *sql.DB, token string) gin.HandlerFunc {
 			flagsStr += flag + ","
 		}
 
-		database.UpdateNovel(db, id, body.Content, flagsStr)
+		database.UpdateNovel(db, id, utils.Substr(body.Title, 0, 50), body.Content, flagsStr)
 
 		c.JSON(200, gin.H{
 			"code":    240,
