@@ -114,7 +114,7 @@ func NovelCreation(db *sql.DB, token string) gin.HandlerFunc {
 		novels := database.GetNovels(db, -1, "", true)
 
 		if len(novels) > 0 {
-			id = novels[0].ID + 1
+			id = novels[len(novels)-1].ID + 1
 		}
 
 		database.CreateNovel(db, id, user.ID, utils.Substr(body.Title, 0, 50), body.Content, flagsStr)
