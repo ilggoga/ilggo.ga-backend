@@ -4,11 +4,13 @@ import (
 	"crypto/sha512"
 	"database/sql"
 	"encoding/hex"
+	"strings"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 	"github.com/pmh-only/ilggo.ga/src/database"
+	"github.com/pmh-only/ilggo.ga/src/utils"
 )
 
 type accountCreationBody struct {
@@ -50,6 +52,39 @@ func AccountFetching(db *sql.DB) gin.HandlerFunc {
 			"code":    140,
 			"success": true,
 			"data":    users[0],
+		})
+	}
+}
+
+// AccountValidation checks account exist & returns account infomation
+func AccountValidation(db *sql.DB, token string) gin.HandlerFunc {
+	return func(c *gin.Context) {
+
+		authHeader := strings.Split(c.GetHeader("Authorization"), " ")
+		if authHeader[0] != "Bearer" {
+			c.JSON(401, gin.H{
+				"code":    151,
+				"success": false,
+				"message": "인증 헤더가 잘못 입력되었습니다.",
+			})
+			return
+		}
+
+		user, err := utils.GetUsersFromJWT(db, authHeader[1], token)
+		if err != nil {
+			c.JSON(401, gin.H{
+				"code":    152,
+				"success": false,
+				"message": "토큰을 해석 할 수 없습니다.",
+				"error":   err.Error(),
+			})
+			return
+		}
+
+		c.JSON(200, gin.H{
+			"code":    150,
+			"success": true,
+			"data":    user,
 		})
 	}
 }

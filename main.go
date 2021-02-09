@@ -26,6 +26,7 @@ func main() {
 		})
 	})
 
+	router.GET("/auth", endpoints.AccountValidation(db, token))
 	router.POST("/auth", endpoints.AccountLogin(db, token))
 	router.GET("/accounts/:id", endpoints.AccountFetching(db))
 	router.POST("/accounts", endpoints.AccountCreation(db))
