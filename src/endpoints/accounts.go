@@ -61,7 +61,7 @@ func AccountValidation(db *sql.DB, token string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 
 		authHeader := strings.Split(c.GetHeader("Authorization"), " ")
-		if authHeader[0] != "Bearer" {
+		if authHeader[0] != "Bearer" || len(authHeader) < 2 {
 			c.JSON(401, gin.H{
 				"code":    151,
 				"success": false,

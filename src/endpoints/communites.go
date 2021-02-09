@@ -39,7 +39,7 @@ func CommuAddLike(db *sql.DB, token string) gin.HandlerFunc {
 		}
 
 		authHeader := strings.Split(c.GetHeader("Authorization"), " ")
-		if authHeader[0] != "Bearer" {
+		if authHeader[0] != "Bearer" || len(authHeader) < 2 {
 			c.JSON(401, gin.H{
 				"code":    313,
 				"success": false,
@@ -103,7 +103,7 @@ func CommuRemoveLike(db *sql.DB, token string) gin.HandlerFunc {
 		}
 
 		authHeader := strings.Split(c.GetHeader("Authorization"), " ")
-		if authHeader[0] != "Bearer" {
+		if authHeader[0] != "Bearer" || len(authHeader) < 2 {
 			c.JSON(401, gin.H{
 				"code":    334,
 				"success": false,
@@ -181,7 +181,7 @@ func CommuCommentCreation(db *sql.DB, token string) gin.HandlerFunc {
 		novelid, err := strconv.Atoi(c.Param("id"))
 
 		authHeader := strings.Split(c.GetHeader("Authorization"), " ")
-		if authHeader[0] != "Bearer" {
+		if authHeader[0] != "Bearer" || len(authHeader) < 2 {
 			c.JSON(401, gin.H{
 				"code":    341,
 				"success": false,
@@ -274,7 +274,7 @@ func CommuCommentUpdation(db *sql.DB, token string) gin.HandlerFunc {
 		}
 
 		authHeader := strings.Split(c.GetHeader("Authorization"), " ")
-		if authHeader[0] != "Bearer" {
+		if authHeader[0] != "Bearer" || len(authHeader) < 2 {
 			c.JSON(401, gin.H{
 				"code":    353,
 				"success": false,
@@ -371,7 +371,7 @@ func CommuCommentDeletion(db *sql.DB, token string) gin.HandlerFunc {
 		}
 
 		authHeader := strings.Split(c.GetHeader("Authorization"), " ")
-		if authHeader[0] != "Bearer" {
+		if authHeader[0] != "Bearer" || len(authHeader) < 2 {
 			c.JSON(401, gin.H{
 				"code":    243,
 				"success": false,

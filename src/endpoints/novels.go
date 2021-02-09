@@ -64,7 +64,7 @@ func NovelListing(db *sql.DB) gin.HandlerFunc {
 func NovelCreation(db *sql.DB, token string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		authHeader := strings.Split(c.GetHeader("Authorization"), " ")
-		if authHeader[0] != "Bearer" {
+		if authHeader[0] != "Bearer" || len(authHeader) < 2 {
 			c.JSON(401, gin.H{
 				"code":    231,
 				"success": false,
@@ -153,7 +153,7 @@ func NovelUpdation(db *sql.DB, token string) gin.HandlerFunc {
 		}
 
 		authHeader := strings.Split(c.GetHeader("Authorization"), " ")
-		if authHeader[0] != "Bearer" {
+		if authHeader[0] != "Bearer" || len(authHeader) < 2 {
 			c.JSON(401, gin.H{
 				"code":    243,
 				"success": false,
@@ -244,7 +244,7 @@ func NovelDeletion(db *sql.DB, token string) gin.HandlerFunc {
 		}
 
 		authHeader := strings.Split(c.GetHeader("Authorization"), " ")
-		if authHeader[0] != "Bearer" {
+		if authHeader[0] != "Bearer" || len(authHeader) < 2 {
 			c.JSON(401, gin.H{
 				"code":    253,
 				"success": false,
