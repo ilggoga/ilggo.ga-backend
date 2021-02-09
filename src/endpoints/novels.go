@@ -120,6 +120,7 @@ func NovelCreation(db *sql.DB, token string) gin.HandlerFunc {
 		database.CreateNovel(db, id, user.ID, utils.Substr(body.Title, 0, 50), body.Content, flagsStr)
 
 		c.JSON(201, gin.H{
+			"id":      id,
 			"code":    230,
 			"success": true,
 			"message": "문서가 성공적으로 업로드 되었습니다.",
