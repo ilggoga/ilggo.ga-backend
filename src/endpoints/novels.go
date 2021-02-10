@@ -178,7 +178,6 @@ func NovelUpdation(db *sql.DB, token string) gin.HandlerFunc {
 				"code":    245,
 				"success": false,
 				"message": "본인이 쓴 게시글만 수정할 수 있습니다.",
-				"error":   err.Error(),
 			})
 			return
 		}
@@ -269,7 +268,6 @@ func NovelDeletion(db *sql.DB, token string) gin.HandlerFunc {
 				"code":    255,
 				"success": false,
 				"message": "본인이 쓴 게시글만 삭제할 수 있습니다.",
-				"error":   err.Error(),
 			})
 			return
 		}
